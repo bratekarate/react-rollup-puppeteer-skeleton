@@ -1,17 +1,16 @@
 import test from "ava";
 import fs from "fs";
 import path from "path";
-import puppeteer from "puppeteer";
+import puppeteer, {Browser, Page} from "puppeteer";
 import url from "url";
 import {ExecutionContext} from 'ava';
 
-let browser: puppeteer.Browser;
+let browser: Browser;
 
 const wsEndpoint = process.env.WS_ENDPOINT;
 const serverUrl = process.env.SERVER_URL;
 
-type AvaCallback = (t: ExecutionContext, page: puppeteer.Page) => Promise<void>
-
+type AvaCallback = (t: ExecutionContext, page: Page) => Promise<void>
 const withPage = async (t: ExecutionContext, run: AvaCallback) => {
   const page = await browser.newPage();
   try {
@@ -21,18 +20,17 @@ const withPage = async (t: ExecutionContext, run: AvaCallback) => {
   }
 };
 
-test.before(async _ => {
+test.before(async () => {
   browser = await puppeteer.connect({
-    browserWSEndpoint: wsEndpoint,
-    browserURL: serverUrl,
+    browserWSEndpoint: wsEndpoint
   });
 });
 
-test.after.always(async _ => {
+test.after.always(async () => {
   browser.disconnect();
 });
 
-const makeScreenshot = async (page: puppeteer.Page, filename: string) => {
+const makeScreenshot = async (page: Page, filename: string) => {
   const clip = await page.evaluate(
     element => ({
       x: element.offsetLeft,
@@ -50,9 +48,9 @@ const makeScreenshot = async (page: puppeteer.Page, filename: string) => {
   fs.writeFileSync(path.resolve(dir, filename), image);
 };
 
-test('page should match snapshot', withPage, async (t: ExecutionContext, page: puppeteer.Page) => {
-    await page.goto(url.resolve(serverUrl, '/'));
-    await makeScreenshot(page, 'shot.png');
+test('page should match snapshot', withPage, async (t: ExecutionContext, page: Page) => {
+  await page.goto(url.resolve(serverUrl, '/'));
+  await makeScreenshot(page, 'shot.png');
 
   t.assert(true);
 });

@@ -9,12 +9,14 @@ import handler from 'serve-handler';
 import http from 'http';
 import {createHttpTerminator} from 'http-terminator';
 import puppeteer from 'puppeteer';
-const fp = require('find-free-port');
+import {spawn} from 'child_process';
+import fp from 'find-free-port';
 
 //const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const input = "src/app/index.tsx";
 
-const watch = process.env.ROLLUP_WATCH === 'true';
+// TODO: Implement watching test files as well (plugin-multi-entry?)
+//const watch = process.env.ROLLUP_WATCH === 'true';
 
 let runningServer = null;
 
@@ -46,6 +48,7 @@ async function serveStop() {
   if (runningServer !== null) {
     console.log(`Terminating server at http://localhost:${runningServer.port}`);
     await runningServer.terminator.terminate();
+    runningServer = null;
   }
 }
 
@@ -53,8 +56,9 @@ let browser = null;
 let wsEndpoint = null;
 async function puppeteerLaunch() {
   console.log('Launching puppeteer.');
-    browser = await puppeteer.launch({ headless: false });
-    wsEndpoint = browser.wsEndpoint();
+  browser = await puppeteer.launch({headless: false});
+  wsEndpoint = browser.wsEndpoint();
+  console.log('ws endpoint is ', wsEndpoint);
 }
 
 function puppeteerStop() {
@@ -113,9 +117,15 @@ export default commandLineArgs => {
     plugins.push({
       buildEnd: async () => {
         console.log('Running tests');
-        // TODO: run tests
-        console.log('Teardown tests');
-        await testTeardown();
+        const avaProc = spawn(`WS_ENDPOINT='${wsEndpoint}' SERVER_URL='http://localhost:${runningServer.port}' npx ava`, {
+          shell: true,
+          cwd: process.cwd(),
+          stdio: 'inherit'
+        });
+        avaProc.on('exit', async () => {
+          console.log('Teardown tests');
+          await testTeardown();
+        });
       }
     });
   }
