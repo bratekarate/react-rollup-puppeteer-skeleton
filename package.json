@@ -27,6 +27,7 @@
     "eslint": "^7.17.0",
     "find-free-port": "^2.0.0",
     "http-terminator": "^2.0.3",
+    "pixelmatch": "^5.2.1",
     "prettier": "^2.2.1",
     "puppeteer": "^5.5.0",
     "react-dom": "^17.0.1",
