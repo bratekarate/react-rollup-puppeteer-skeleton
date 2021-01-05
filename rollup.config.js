@@ -8,10 +8,11 @@ import path from "path";
 import handler from 'serve-handler';
 import http from 'http';
 import {createHttpTerminator} from 'http-terminator';
+import puppeteer from 'puppeteer';
 const fp = require('find-free-port');
 
 //const extensions = [".js", ".jsx", ".ts", ".tsx"];
-const input = "src/index.tsx";
+const input = "src/app/index.tsx";
 
 const watch = process.env.ROLLUP_WATCH === 'true';
 
@@ -48,6 +49,22 @@ async function serveStop() {
   }
 }
 
+let browser = null;
+let wsEndpoint = null;
+async function puppeteerLaunch() {
+  console.log('Launching puppeteer.');
+    browser = await puppeteer.launch({ headless: false });
+    wsEndpoint = browser.wsEndpoint();
+}
+
+function puppeteerStop() {
+  console.log('Stopping puppeteer.');
+  if (browser === null) {
+    return;
+  }
+  browser.close()
+}
+
 const servePlugin = {
   buildStart: async () => {
     await serveStart();
@@ -76,8 +93,14 @@ const external = [
   //...Object.keys(pkg.dependencies),
 ];
 
-const testSetup = async () => await serveStart();
-const testTeardown = async () => await serveStop();
+const testSetup = async () => {
+  await serveStart();
+  await puppeteerLaunch();
+};
+const testTeardown = async () => {
+  await serveStop();
+  puppeteerStop();
+};
 
 export default commandLineArgs => {
   if (commandLineArgs.configTest === true) {
