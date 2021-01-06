@@ -117,7 +117,7 @@ export default commandLineArgs => {
     plugins.push({
       buildEnd: async () => {
         console.log('Running tests');
-        const avaProc = spawn(`WS_ENDPOINT='${wsEndpoint}' SERVER_URL='http://localhost:${runningServer.port}' npx ava -v`, {
+        const avaProc = spawn(`WS_ENDPOINT='${wsEndpoint}' SERVER_URL='http://localhost:${runningServer.port}' npx ava`, {
           shell: true,
           cwd: process.cwd(),
           stdio: 'inherit'
