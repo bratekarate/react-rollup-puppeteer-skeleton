@@ -15,7 +15,7 @@ import fp from 'find-free-port';
 //const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const input = "src/app/index.tsx";
 
-// TODO: Implement watching test files as well (plugin-multi-entry?)
+// TODO: Implement watching test files as well
 //const watch = process.env.ROLLUP_WATCH === 'true';
 
 let runningServer = null;
@@ -117,7 +117,7 @@ export default commandLineArgs => {
     plugins.push({
       buildEnd: async () => {
         console.log('Running tests');
-        const avaProc = spawn(`WS_ENDPOINT='${wsEndpoint}' SERVER_URL='http://localhost:${runningServer.port}' npx ava`, {
+        const avaProc = spawn(`WS_ENDPOINT='${wsEndpoint}' SERVER_URL='http://localhost:${runningServer.port}' npx ava -v`, {
           shell: true,
           cwd: process.cwd(),
           stdio: 'inherit'
