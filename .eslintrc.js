@@ -3,6 +3,7 @@ module.exports = {
   //parser: "@babel/eslint-parser",
   parser: "esprima",
   parserOptions: {
+    project: './tsconfig.json',
     sourceType: "module",
     ecmaVersion: 6,
     ecmaFeatures: {
@@ -16,7 +17,8 @@ module.exports = {
     browser: true
   },
   rules: {
-    'prefer-const': 'warn'
+    'prefer-const': 'warn',
+    '@typescript-eslint/dot-notation': 'warn',
   },
   extends: "eslint:recommended",
   overrides: [
@@ -30,6 +32,9 @@ module.exports = {
         "react"
       ],
       parser: "@typescript-eslint/parser",
+      rules: {
+        'react/prop-types': 'off',
+      },
       extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
